@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Hranice ČH">
+<meta name="theme-color" content="#16202b">
+<meta name="format-detection" content="telephone=no">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%2316202b%27%2F%3E%3Cpath%20d%3D%27M16%206c-3.4%200-6.1%202.7-6.1%206.1%200%204.3%206.1%2012%206.1%2012s6.1-7.7%206.1-12C22.1%208.7%2019.4%206%2016%206z%27%20fill%3D%27%23c9a227%27%2F%3E%3Ccircle%20cx%3D%2716%27%20cy%3D%2712%27%20r%3D%272.4%27%20fill%3D%27%2316202b%27%2F%3E%3C%2Fsvg%3E">
+<title>Stav na hraničních přechodech a mýtných bodech — Černá Hora</title>
+
+<!-- Leaflet 1.9.4 CSS (vloženo přímo do souboru kvůli spolehlivosti) -->
+<style>
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+</style>
+
+<style>
+  :root{
+    --ink:#16202b;
+    --ink-2:#243443;
+    --paper:#f6f4ee;
+    --gold:#c9a227;
+    --line:#d8d2c4;
+    --srb:#c62828;
+    --alb:#7b1fa2;
+    --hrv:#1565c0;
+    --bih:#2e7d32;
+    --toll:#ef6c00;
+    --shadow:0 6px 22px rgba(16,22,32,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    background:var(--ink);
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    flex:0 0 auto;
+    background:linear-gradient(180deg,var(--ink) 0%, var(--ink-2) 100%);
+    color:#fff;
+    border-bottom:3px solid var(--gold);
+    padding:calc(10px + env(safe-area-inset-top,0px)) calc(16px + env(safe-area-inset-right,0px)) 11px calc(16px + env(safe-area-inset-left,0px));
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:10px 24px;
+    flex-wrap:wrap;
+  }
+  .brand{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .brand h1{
+    margin:0;
+    font-size:clamp(15px,2.2vw,20px);
+    font-weight:800;
+    letter-spacing:.04em;
+    text-transform:uppercase;
+    line-height:1.15;
+  }
+  .brand h1 .accent{color:var(--gold)}
+  .brand .sub{
+    font-size:12px;
+    color:#b9c4d1;
+    font-weight:500;
+    letter-spacing:.01em;
+  }
+  .src{
+    font-size:11.5px;
+    color:#aeb9c6;
+    text-align:right;
+    line-height:1.45;
+    max-width:340px;
+  }
+  .src a{color:var(--gold);text-decoration:none}
+  .src a:hover,.src a:focus{text-decoration:underline}
+
+  /* ---------- Map ---------- */
+  #map{flex:1 1 auto;width:100%;background:#aad3df}
+  .leaflet-container{font:inherit}
+
+  /* ---------- Marker pin ---------- */
+  .pin{
+    filter:drop-shadow(0 3px 3px rgba(16,22,32,.45));
+    cursor:pointer;
+    transition:transform .12s ease;
+  }
+  .pin:hover{transform:translateY(-2px) scale(1.06)}
+
+  /* ---------- Popup ---------- */
+  .leaflet-popup-content-wrapper{border-radius:12px;box-shadow:var(--shadow)}
+  .leaflet-popup-content{margin:13px 15px;line-height:1.4}
+  .pp{min-width:206px;max-width:260px}
+  .pp-name{
+    font-size:15px;font-weight:800;letter-spacing:.01em;
+    padding-left:10px;border-left:4px solid var(--line);margin-bottom:4px;
+  }
+  .pp-desc{font-size:12.5px;color:#41525f;margin:0 0 9px 0}
+  .pp a.cam{
+    display:block;text-decoration:none;
+    background:var(--ink);color:#fff;
+    font-size:12.5px;font-weight:700;
+    padding:8px 11px;border-radius:8px;margin-top:6px;
+    transition:background .12s ease;
+  }
+  .pp a.cam:hover,.pp a.cam:focus{background:var(--gold);color:var(--ink)}
+  .pp a.cam .arr{opacity:.8;margin-right:5px}
+  .pp-note{
+    font-size:11px;color:#5d6b78;margin-top:8px;
+    border-top:1px dashed var(--line);padding-top:7px;
+  }
+  .pp-warn{color:#a23b00;font-weight:600}
+
+  /* ---------- Legend ---------- */
+  .legend{
+    background:rgba(255,255,255,.97);
+    border:1px solid var(--line);
+    border-radius:11px;
+    box-shadow:var(--shadow);
+    padding:10px 12px;
+    font-size:12.5px;
+    color:var(--ink);
+    max-width:230px;
+  }
+  .legend .lg-head{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:8px;cursor:pointer;user-select:none;font-weight:800;
+    letter-spacing:.03em;text-transform:uppercase;font-size:11.5px;
+  }
+  .legend .lg-head .tog{
+    color:#7a8794;font-weight:700;font-size:13px;line-height:1;
+    transition:transform .15s ease;
+  }
+  .legend.collapsed .tog{transform:rotate(-90deg)}
+  .legend.collapsed .lg-body{display:none}
+  .lg-body{margin-top:9px}
+  .lg-row{display:flex;align-items:center;gap:9px;padding:3px 0}
+  .lg-dot{
+    flex:0 0 auto;width:14px;height:14px;border-radius:50%;
+    border:2px solid #fff;box-shadow:0 0 0 1px rgba(16,22,32,.25);
+  }
+  .lg-row .lg-label{flex:1}
+  .lg-row .lg-count{color:#7a8794;font-variant-numeric:tabular-nums}
+  .lg-note{
+    margin-top:9px;padding-top:8px;border-top:1px solid var(--line);
+    font-size:11px;color:#5d6b78;line-height:1.5;
+  }
+  .lg-note b{color:var(--ink)}
+
+  .leaflet-bar a{color:var(--ink)}
+
+  @media (max-width:640px){
+    header{padding:8px 12px 9px}
+    .src{text-align:left;max-width:none;flex-basis:100%}
+    .legend{max-width:62vw;font-size:12px}
+  }
+
+  /* Bezpečné zóny (notch / home indikátor) v režimu „Přidat na plochu" */
+  .leaflet-bottom{bottom:env(safe-area-inset-bottom,0px)}
+  .leaflet-left{left:env(safe-area-inset-left,0px)}
+  .leaflet-right{right:env(safe-area-inset-right,0px)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <h1>Stav na hraničních přechodech a&nbsp;mýtných bodech <span class="accent">— Černá Hora</span></h1>
+    <div class="sub">Živé kamery hraničních přechodů (MUP) a&nbsp;dálničních bodů (Monteput) · klikněte na značku</div>
+  </div>
+  <div class="src">
+    Odkazy pocházejí z&nbsp;MUP Černé Hory a&nbsp;Monteputu, agregováno přes CdM.<br>
+    Zdroj: <a href="https://www.cdm.me/drustvo/pratite-stanje-na-granicama-i-naplatnim-punktovima-228/" target="_blank" rel="noopener">cdm.me — Pratite stanje na granicama i naplatnim punktovima</a>
+  </div>
+</header>
+
+<div id="map"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+function initMap(){
+/* ---------- Kategorie ---------- */
+const CAT = {
+  SRB:  {label:"Srbsko",                 color:"#c62828"},
+  ALB:  {label:"Albánie",                color:"#7b1fa2"},
+  HRV:  {label:"Chorvatsko",             color:"#1565c0"},
+  BIH:  {label:"Bosna a Hercegovina",    color:"#2e7d32"},
+  TOLL: {label:"Mýtné / silniční body",  color:"#ef6c00"}
+};
+
+/* Poznámka pro hraniční přechody MUP – sdružená stránka s oběma směry */
+const BOTH = "Stránka MUP sdružuje kamery přechodu a zobrazuje oba směry: ulaz = vjezd, izlaz = výjezd.";
+
+/* ---------- Body (skutečné geografické polohy z OSM/GeoNames) ---------- */
+const POINTS = [
+  /* Hranice se Srbskem */
+  {name:"Dračenovac", cat:"SRB", lat:42.90204, lng:20.31840,
+   desc:"Hranice se Srbskem · směr Rožaje – Novi Pazar (Špiljani)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Dracenovac&lang=me", note:BOTH},
+
+  {name:"Dobrakovo", cat:"SRB", lat:43.14349, lng:19.78007,
+   desc:"Hranice se Srbskem · směr Bijelo Polje – Prijepolje (Gostun)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Dobrakovo&lang=me", note:BOTH},
+
+  {name:"Ranče", cat:"SRB", lat:43.33664, lng:19.47384,
+   desc:"Hranice se Srbskem · směr Pljevlja – Prijepolje (Jabuka)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Ranca&lang=me", note:BOTH},
+
+  /* Hranice s Albánií */
+  {name:"Božaj", cat:"ALB", lat:42.32964, lng:19.41883,
+   desc:"Hranice s Albánií · směr Podgorica – Skadar (Hani i Hotit)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Bozaj&lang=me", note:BOTH},
+
+  {name:"Sukobin", cat:"ALB", lat:42.01636, lng:19.37055,
+   desc:"Hranice s Albánií · směr Ulcinj – Skadar (Muriqan)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Sukobin&lang=me",
+   note:BOTH, warn:"Pozn.: na stránce MUP je aktuálně živý jen směr výjezd (izlaz); vjezd (ulaz) bez streamu."},
+
+  /* Hranice s Chorvatskem */
+  {name:"Debeli Brijeg", cat:"HRV", lat:42.48101, lng:18.45584,
+   desc:"Hranice s Chorvatskem · jadranská silnice, směr Herceg Novi – Dubrovnik (Karasovići)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Debeli%20Brijeg&lang=me", note:BOTH},
+
+  /* Hranice s Bosnou a Hercegovinou */
+  {name:"Vraćenovići", cat:"BIH", lat:42.86194, lng:18.47980,
+   desc:"Hranice s BiH · směr Nikšić – Bileća (Deleuša)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Vracenovici&lang=me", note:BOTH},
+
+  {name:"Šćepan Polje", cat:"BIH", lat:43.34824, lng:18.84777,
+   desc:"Hranice s BiH · soutok Tary a Pivy, směr Plužine – Foča / Sarajevo (Hum)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Scepan%20polje&lang=me", note:BOTH},
+
+  {name:"Ilino Brdo", cat:"BIH", lat:42.71292, lng:18.57004,
+   desc:"Hranice s BiH · směr Nikšić – Trebinje (Klobuk)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Ilino%20brdo&lang=me", note:BOTH},
+
+  {name:"Sitnica", cat:"BIH", lat:42.56159, lng:18.44405,
+   desc:"Hranice s BiH · směr Herceg Novi – Trebinje (Zupci)",
+   camLabel:"Kamera MUP — vjezd i výjezd (ulaz/izlaz)",
+   url:"http://kamere.mup.gov.me/kamere.php?kamere=Sitnica&lang=me", note:BOTH},
+
+  /* Mýtné / silniční body (Monteput) – jednosměrné kamery */
+  {name:"Sozina", cat:"TOLL", lat:42.17222, lng:19.05778,
+   desc:"Mýtný bod · tunel Sozina, dálnice A1 Podgorica – Bar (mýto ~2,50 €)",
+   camLabel:"Kamera (Monteput)",
+   url:"https://www.ipcamlive.com/sozina"},
+
+  {name:"Mateševo", cat:"TOLL", lat:42.76111, lng:19.55333,
+   desc:"Mýtný bod · dálnice A1 Bar – Boljare, úsek Smokovac–Mateševo",
+   camLabel:"Kamera (Monteput)",
+   url:"https://www.ipcamlive.com/matesevo"},
+
+  {name:"Smokovac", cat:"TOLL", lat:42.47974, lng:19.30540,
+   desc:"Mýtný bod · dálniční rampa A1 u Podgorice (mýtná stanice, ~3,50 € Bar–Mateševo)",
+   camLabel:"Kamera (Monteput)",
+   url:"https://www.ipcamlive.com/smokovac"}
+];
+
+/* ---------- Mapa ---------- */
+const map = L.map("map", {zoomControl:true, minZoom:6, maxZoom:18})
+             .setView([42.75, 19.25], 8);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  maxZoom:19,
+  attribution:'&copy; přispěvatelé <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+}).addTo(map);
+
+/* ---------- Tvar značky (barevná „kapka") ---------- */
+function pinIcon(color){
+  const svg =
+    '<svg class="pin" width="28" height="40" viewBox="0 0 28 40" xmlns="http://www.w3.org/2000/svg">'+
+      '<path d="M14 0C6.27 0 0 6.27 0 14c0 9.65 14 26 14 26s14-16.35 14-26C28 6.27 21.73 0 14 0z" '+
+        'fill="'+color+'" stroke="#ffffff" stroke-width="2.2"/>'+
+      '<circle cx="14" cy="14" r="5.1" fill="#ffffff" fill-opacity="0.92"/>'+
+    '</svg>';
+  return L.divIcon({
+    className:"",
+    html:svg,
+    iconSize:[28,40],
+    iconAnchor:[14,40],
+    popupAnchor:[0,-34]
+  });
+}
+
+/* ---------- Vykreslení bodů ---------- */
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+const counts = {SRB:0,ALB:0,HRV:0,BIH:0,TOLL:0};
+const bounds = [];
+
+POINTS.forEach(p=>{
+  const c = CAT[p.cat];
+  counts[p.cat]++;
+  bounds.push([p.lat,p.lng]);
+
+  let html =
+    '<div class="pp">'+
+      '<div class="pp-name" style="border-left-color:'+c.color+'">'+esc(p.name)+'</div>'+
+      '<div class="pp-desc">'+esc(p.desc)+'</div>'+
+      '<a class="cam" href="'+p.url+'" target="_blank" rel="noopener">'+
+        '<span class="arr">▶</span>'+esc(p.camLabel)+
+      '</a>';
+  if(p.warn) html += '<div class="pp-note pp-warn">'+esc(p.warn)+'</div>';
+  if(p.note) html += '<div class="pp-note">'+esc(p.note)+'</div>';
+  html += '</div>';
+
+  L.marker([p.lat,p.lng], {icon:pinIcon(c.color), title:p.name, riseOnHover:true})
+   .addTo(map)
+   .bindPopup(html, {maxWidth:280, autoPanPadding:[24,24]});
+});
+
+/* Výřez tak, aby byly vidět všechny body */
+map.fitBounds(bounds, {padding:[42,42]});
+
+/* ---------- Legenda ---------- */
+const legend = L.control({position:"bottomright"});
+legend.onAdd = function(){
+  const div = L.DomUtil.create("div","legend");
+  L.DomEvent.disableClickPropagation(div);
+  L.DomEvent.disableScrollPropagation(div);
+
+  let rows = "";
+  Object.keys(CAT).forEach(k=>{
+    rows +=
+      '<div class="lg-row">'+
+        '<span class="lg-dot" style="background:'+CAT[k].color+'"></span>'+
+        '<span class="lg-label">'+CAT[k].label+'</span>'+
+        '<span class="lg-count">'+counts[k]+'</span>'+
+      '</div>';
+  });
+
+  div.innerHTML =
+    '<div class="lg-head" role="button" tabindex="0" aria-label="Sbalit / rozbalit legendu">'+
+      '<span>Legenda · '+POINTS.length+' bodů</span><span class="tog">▾</span>'+
+    '</div>'+
+    '<div class="lg-body">'+
+      rows +
+      '<div class="lg-note">'+
+        '<b>ulaz</b> = vjezd · <b>izlaz</b> = výjezd. Stránky MUP zobrazují u přechodů oba směry. '+
+        'Mýtné body (Monteput) jsou jednosměrné kamery. Odkazy se otevírají v nové záložce.'+
+      '</div>'+
+    '</div>';
+
+  const head = div.querySelector(".lg-head");
+  const toggle = ()=>div.classList.toggle("collapsed");
+  head.addEventListener("click", toggle);
+  head.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){e.preventDefault();toggle();} });
+
+  /* Na úzkých displejích legendu výchozí sbalit */
+  if (window.matchMedia("(max-width:640px)").matches) div.classList.add("collapsed");
+
+  return div;
+};
+legend.addTo(map);
+}
+
+/* ---- Bootstrap: spustí mapu až po načtení Leafletu, s fallbackem na druhý CDN ---- */
+(function(){
+  function fail(){
+    var el=document.getElementById("map");
+    if(el) el.innerHTML='<div style="padding:26px;font:14px/1.55 -apple-system,Segoe UI,Roboto,sans-serif;color:#fff">Nepodařilo se načíst knihovnu Leaflet z\u00a0CDN. Otevřete prosím tento soubor v\u00a0běžném prohlížeči s\u00a0připojením k\u00a0internetu.</div>';
+  }
+  if(typeof L!=="undefined"){ initMap(); return; }
+  var s=document.createElement("script");
+  s.src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  s.onload=function(){ (typeof L!=="undefined") ? initMap() : fail(); };
+  s.onerror=fail;
+  document.head.appendChild(s);
+})();
+</script>
+</body>
+</html>
